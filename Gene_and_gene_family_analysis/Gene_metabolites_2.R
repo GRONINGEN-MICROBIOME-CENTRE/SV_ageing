@@ -168,7 +168,7 @@ test=as.data.frame(table(humann_metabolites_significant$X))
 #2−(2,4−dihydroxyphenyl)−3−(3,7−dimethylocta−2,6−dien−1−yl)−5,7−dihydroxy−6−(4−hydroxy−3−methylbut−2−en−1−yl)−4H−chromen−4−one
 
 #### 4. metabolites enrichment analysis using clusterProfiler ####
-# Combine together with the resutls of the metabolite-related genes families which are extracted from the non-age-associated SVs
+# Combine together with the resutls of the metabolite-related genes which are extracted from the age-associated SVs
 shortbred_metabolites_significant <- readRDS("~/Documents/SV_MWAS/NM_reviosion/Table_Shortbred_metabolites.rds")
 for (i in c("Y","X")){`shortbred_metabolites_significant`[,i]=as.character(`shortbred_metabolites_significant`[,i])}
 shortbred_metabolites_significant=shortbred_metabolites_significant[which(!shortbred_metabolites_significant$significance==c("non-significant")),]
