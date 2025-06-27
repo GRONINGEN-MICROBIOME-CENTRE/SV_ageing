@@ -168,21 +168,32 @@ test=as.data.frame(table(humann_metabolites_significant$X))
 #2−(2,4−dihydroxyphenyl)−3−(3,7−dimethylocta−2,6−dien−1−yl)−5,7−dihydroxy−6−(4−hydroxy−3−methylbut−2−en−1−yl)−4H−chromen−4−one
 
 #### 4. metabolites enrichment analysis using clusterProfiler ####
-library(clusterProfiler)
-# metabolites annotation
-metabolites_info <- read.delim("/Users/helloduck/Documents/SV_MWAS/R/Raw_data/key_lld_1183meta_annotation.tsv",sep="\t",row.names = 1,header = T,check.names = F,fill = F)
-metabolites_info=metabolites_info[which(row.names(metabolites_info)%in%age_metabolites),]
-metabolites_info$class[which(metabolites_info$class==c("Indoles and derivatives"))]=c("tryptophan metabolites")
-metabolites_info$class[grep("p-Cresol sulfate",metabolites_info$name)]=c("Phenols")
+# Combine together with the resutls of the metabolite-related genes families which are extracted from the non-age-associated SVs
+shortbred_metabolites_significant <- readRDS("~/Documents/SV_MWAS/NM_reviosion/Table_Shortbred_metabolites.rds")
+for (i in c("Y","X")){`shortbred_metabolites_significant`[,i]=as.character(`shortbred_metabolites_significant`[,i])}
+shortbred_metabolites_significant=shortbred_metabolites_significant[which(!shortbred_metabolites_significant$significance==c("non-significant")),]
+length(unique(shortbred_metabolites_significant$X))#63 metabolites
+length(unique(shortbred_metabolites_significant$Y))#73 genes
 
-# interest metabolite list
 humann_metabolites_significant <- readRDS("~/Documents/SV_MWAS/NM_reviosion/Table_Humann_metabolites.rds")
 for (i in c("Y","X")){`humann_metabolites_significant`[,i]=as.character(`humann_metabolites_significant`[,i])}
 humann_metabolites_significant=humann_metabolites_significant[which(!humann_metabolites_significant$significance==c("non-significant")),]
-gene_list<- unique(humann_metabolites_significant$name)
-length(gene_list)#67
+length(unique(humann_metabolites_significant$X))#67 metabolites
+length(unique(humann_metabolites_significant$Y))#58 gene families
+
+metabolite_all = unique(unique(shortbred_metabolites_significant$X),unique(humann_metabolites_significant$X))
+length(metabolite_all)#63
+
+library(clusterProfiler)
+metabolites_info <- read.delim("/Users/helloduck/Documents/SV_MWAS/R/Raw_data/key_lld_1183meta_annotation.tsv",sep="\t",row.names = 1,header = T,check.names = F,fill = F)
+age_metabolites <- readRDS("/Users/helloduck/Documents/SV_MWAS/R/R_scripts/Step1/Results/age_metabolites.rds")
+metabolites_info=metabolites_info[row.names(metabolites_info)%in%age_metabolites,]
+
+# interest metabolite list
+metabolite_list = metabolites_info$name[which(row.names(metabolites_info)%in%metabolite_all)]
+
 # Enrichment analysis
-go_rich <- enricher(gene = gene_list,
+go_rich <- enricher(gene = metabolite_list,
                     TERM2GENE = metabolites_info[,c("class","name")], 
                     TERM2NAME = metabolites_info[,c("class","class")], 
                     pvalueCutoff = 1, 
@@ -190,9 +201,8 @@ go_rich <- enricher(gene = gene_list,
                     qvalueCutoff = 0.05, 
                     maxGSSize = 500)
 metabolites_reasult <- data.frame(go_rich@result)
-saveRDS(metabolites_reasult, "/Users/helloduck/Documents/SV_MWAS/NM_reviosion/Final R scripts/metabolites_reasult_humann.rds")
+saveRDS(metabolites_reasult, "/Users/helloduck/Documents/SV_MWAS/NM_reviosion/Final R scripts/metabolites_reasult_final.rds")
 write.table(metabolites_reasult, "/Users/helloduck/Desktop/table1.tsv",sep = "\t", col.names = T, row.names = F, quote = F)
-
 
 #### 5.1 UniRef90_R5P1L6 ~ Indole-3-propionic acid  ####
 Humann4.0_LLD <- readRDS("~/Documents/SV_MWAS/NM_reviosion/Humann4.0_LLD.rds")
